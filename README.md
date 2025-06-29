@@ -1,58 +1,80 @@
-# 🔧 Utility Functions for `fredclient`
+# fredclient
 
-This document outlines the utility methods available in the `fredclient` module for inspecting the FRED API endpoints.
+A lightweight, user-friendly Python wrapper for the [FRED API](https://fred.stlouisfed.org/), with automatic support for all documented endpoints and a focus on flexibility, validation, and discoverability.
+
+## Features
+
+- Access all FRED API endpoints dynamically
+- Validates required and optional parameters
+- Automatically documents parameter types and endpoint descriptions
+- Easy integration into any data workflow
+- Simple error handling with Python-native exceptions
+- Utility functions to explore API capabilities
 
 ---
 
-## `get_all_endpoints()`
+## Installation
 
-Returns a list of all available FRED API endpoints that are wrapped in the client.
+```bash
+pip install fredclient
+```
 
-**Returns:**  
-- `list[str]`: List of endpoint function names (e.g., `get_series`, `get_category_tags`, etc.)
+Or clone directly from GitHub:
 
-**Example:**
+```bash
+git clone https://github.com/arbaizam/fredclient.git
+cd fredclient
+pip install -e .
+```
+
+---
+
+## Usage
+
+### Basic Example
+
+```python
+from fredclient import get_series_observations
+
+data = get_series_observations(
+    api_key="YOUR_API_KEY",
+    series_id="GDP",
+    file_type="json"
+)
+
+print(data)
+```
+
+---
+
+### List All Available Endpoints
 
 ```python
 from fredclient import get_all_endpoints
 
 print(get_all_endpoints())
-# Output: ['get_category', 'get_category_children', 'get_category_related', ..., 'get_series_search']
 ```
 
 ---
 
-## `describe_endpoint(name: str)`
-
-Returns a detailed, formatted string describing an individual endpoint, including:
-- Summary of what it does
-- Required parameters and their types
-- Optional parameters and their types
-
-**Parameters:**  
-- `name` (`str`): The name of the endpoint (e.g., `"get_series_observations"`)
-
-**Returns:**  
-- `str`: Formatted multi-line string describing the endpoint
-
-**Raises:**  
-- `KeyError`: If the provided name does not match any available endpoint
-
-**Example:**
+### Describe a Specific Endpoint
 
 ```python
 from fredclient import describe_endpoint
 
-print(describe_endpoint("get_category_series"))
+print(describe_endpoint("get_series_observations"))
 ```
 
-**Output:**
+---
+
+### Example Output for `describe_endpoint("get_series_observations")`
+
 ```
-get_category_series: Retrieve series within a specified category.
+get_series_observations: Get observations for a series.
 
 Required parameters:
   - api_key: str
-  - category_id: int
+  - series_id: str
 
 Optional parameters:
   - file_type: str
@@ -60,8 +82,36 @@ Optional parameters:
   - realtime_end: str
   - limit: int
   - offset: int
-  - order_by: str
   - sort_order: str
-  - filter_variable: str
-  - filter_value: str
+  - observation_start: str
+  - observation_end: str
+  - units: str
+  - frequency: str
+  - aggregation_method: str
 ```
+
+---
+
+## Testing
+
+To run all tests:
+
+```bash
+pytest tests/
+```
+
+---
+
+## Contributing
+
+Feel free to submit issues or pull requests. Future enhancements will include:
+
+- Full schema-based validation
+- Pydantic model support for response parsing
+- Support for async and batch queries
+
+---
+
+## License
+
+MIT License.
