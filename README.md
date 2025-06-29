@@ -1,113 +1,67 @@
-# fredclient
+# 🔧 Utility Functions for `fredclient`
 
-Python client for the [FRED API](https://fred.stlouisfed.org/) — built from the official OpenAPI schema. This client lets you easily query macroeconomic data from the Federal Reserve Bank of St. Louis.
-
----
-
-## 📦 Installation
-
-You can install the package directly from GitHub:
-
-```bash
-pip install git+https://github.com/arbaizam/fredclient.git
-```
+This document outlines the utility methods available in the `fredclient` module for inspecting the FRED API endpoints.
 
 ---
 
-## 🔑 Authentication
+## `get_all_endpoints()`
 
-To use the FRED API, you’ll need an API key.  
-Sign up for a free key here: https://fred.stlouisfed.org/docs/api/api_key.html
+Returns a list of all available FRED API endpoints that are wrapped in the client.
 
-Then use it in your code like this:
+**Returns:**  
+- `list[str]`: List of endpoint function names (e.g., `get_series`, `get_category_tags`, etc.)
+
+**Example:**
 
 ```python
-from fredclient import FredAPI
+from fredclient import get_all_endpoints
 
-fred = FredAPI(api_key="YOUR_API_KEY")
+print(get_all_endpoints())
+# Output: ['get_category', 'get_category_children', 'get_category_related', ..., 'get_series_search']
 ```
 
 ---
 
-## 🧪 Basic Usage
+## `describe_endpoint(name: str)`
 
-### Get Observations for a Series
+Returns a detailed, formatted string describing an individual endpoint, including:
+- Summary of what it does
+- Required parameters and their types
+- Optional parameters and their types
+
+**Parameters:**  
+- `name` (`str`): The name of the endpoint (e.g., `"get_series_observations"`)
+
+**Returns:**  
+- `str`: Formatted multi-line string describing the endpoint
+
+**Raises:**  
+- `KeyError`: If the provided name does not match any available endpoint
+
+**Example:**
+
 ```python
-data = fred.get_series_observations(series_id="GDP")
-print(data)
+from fredclient import describe_endpoint
+
+print(describe_endpoint("get_category_series"))
 ```
 
-### Search for Series by Keyword
-```python
-results = fred.get_series_search(search_text="unemployment rate")
-for series in results["seriess"]:
-    print(series["title"])
+**Output:**
 ```
+get_category_series: Retrieve series within a specified category.
 
-### Get Category Information
-```python
-category = fred.get_category(category_id=125)
-print(category)
+Required parameters:
+  - api_key: str
+  - category_id: int
+
+Optional parameters:
+  - file_type: str
+  - realtime_start: str
+  - realtime_end: str
+  - limit: int
+  - offset: int
+  - order_by: str
+  - sort_order: str
+  - filter_variable: str
+  - filter_value: str
 ```
-
-### Get Child Categories
-```python
-children = fred.get_category_children(category_id=125)
-```
-
-### Get List of Releases
-```python
-releases = fred.get_releases(limit=5)
-```
-
----
-
-## 📁 Project Structure
-
-```
-fredclient/
-├── __init__.py           # Public client interface (FredAPI)
-├── core/                 # (Planned) Internal utilities, data types
-├── pyproject.toml        # Build metadata
-├── README.md             # You're reading it
-└── tests/                # Test suite (coming soon)
-```
-
----
-
-## 🚧 Planned Features
-
-- Auto-generated endpoint coverage from OpenAPI
-- Async support
-- DataFrame helpers (e.g. `.to_df()`)
-- Tag and source lookup functions
-- CLI tool
-
----
-
-## 🧪 Testing Locally
-
-Clone the repo and run:
-
-```bash
-pip install -e .
-```
-
----
-
-## 🙌 Contributing
-
-Pull requests and suggestions are welcome!  
-If you find a bug or have feature ideas, [open an issue](https://github.com/arbaizam/fredclient/issues).
-
----
-
-## 📄 License
-
-MIT License — see `LICENSE` file for details.
-
----
-
-## 👋 Author
-
-Developed by [@arbaizam](https://github.com/arbaizam)
