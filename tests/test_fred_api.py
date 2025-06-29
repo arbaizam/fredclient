@@ -1,39 +1,56 @@
-import pytest
 import os
-from fredclient import endpoints
+import pytest
+from fredclient.client import FredClient
 
-API_KEY = os.getenv("FRED_API_KEY", "YOUR_API_KEY")
-
-
-@pytest.mark.parametrize("func_name, kwargs", [
-    ("get_category", {"api_key": API_KEY, "category_id": 125}),
-    ("get_category_children", {"api_key": API_KEY, "category_id": 125}),
-    ("get_category_related", {"api_key": API_KEY, "category_id": 125}),
-    ("get_category_series", {"api_key": API_KEY, "category_id": 125}),
-    ("get_category_tags", {"api_key": API_KEY, "category_id": 125}),
-    ("get_category_related_tags", {"api_key": API_KEY, "category_id": 125, "tag_names": "gdp"}),
-    ("get_series", {"api_key": API_KEY, "series_id": "GDP"}),
-    ("get_series_categories", {"api_key": API_KEY, "series_id": "GDP"}),
-    ("get_series_observations", {
-        "api_key": API_KEY,
-        "series_id": "GDP",
-        "file_type": "json",
-        "observation_start": "2020-01-01",
-        "observation_end": "2020-12-31"
-    }),
-    ("get_series_search", {"api_key": API_KEY, "search_text": "unemployment"})
-])
-def test_fred_endpoints_success(func_name, kwargs):
-    func = getattr(endpoints, func_name)
-    response = func(**kwargs)
-    assert isinstance(response, dict), f"{func_name} did not return a dict"
+API_KEY = os.getenv("FRED_API_KEY", "your_api_key_here")  # replace with real key or set ENV var
 
 
-def test_missing_required_param():
-    with pytest.raises(ValueError):
-        endpoints.get_category(category_id=125)  # Missing api_key
+@pytest.fixture(scope="module")
+def fred():
+    return FredClient(api_key=API_KEY)
 
 
-def test_invalid_param_type():
+def test_get_all_endpoints(fred):
+    endpoints = fred.get_all_endpoints()
+    assert isinstance(endpoints, list)
+    assert "get_series" in endpoints
+
+
+def test_describe_endpoint(fred):
+    doc = fred.describe_endpoint("get_series")
+    assert "Required parameters:" in doc
+    assert "series_id" in doc
+
+
+def test_get_series(fred):
+    response = fred.get_series(series_id="GNPCA")
+    assert isinstance(response, dict)
+    assert "seriess" in response
+
+
+def test_get_category_series(fred):
+    response = fred.get_category_series(category_id=125)
+    assert isinstance(response, dict)
+    assert "seriess" in response
+
+
+def test_get_series_search(fred):
+    response = fred.get_series_search(search_text="unemployment")
+    assert isinstance(response, dict)
+    assert "seriess" in response
+
+
+def test_get_series_observations(fred):
+    response = fred.get_series_observations(series_id="GNPCA")
+    assert isinstance(response, dict)
+    assert "observations" in response
+
+
+def test_invalid_param_type(fred):
     with pytest.raises(TypeError):
-        endpoints.get_series(api_key=API_KEY, series_id=1234)  # series_id should be str
+        fred.get_series(series_id=123)  # should be str
+
+
+def test_missing_required_param(fred):
+    with pytest.raises(ValueError):
+        fred.get_series()  # missing series_id

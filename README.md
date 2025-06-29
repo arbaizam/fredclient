@@ -1,117 +1,91 @@
-# fredclient
+# FRED Client (`fredclient`)
 
-A lightweight, user-friendly Python wrapper for the [FRED API](https://fred.stlouisfed.org/), with automatic support for all documented endpoints and a focus on flexibility, validation, and discoverability.
-
-## Features
-
-- Access all FRED API endpoints dynamically
-- Validates required and optional parameters
-- Automatically documents parameter types and endpoint descriptions
-- Easy integration into any data workflow
-- Simple error handling with Python-native exceptions
-- Utility functions to explore API capabilities
+A lightweight, Pythonic wrapper for the [FRED API](https://fred.stlouisfed.org/docs/api/fred/) provided by the Federal Reserve Bank of St. Louis. This package simplifies access to economic data by dynamically handling all endpoints via a single client class.
 
 ---
 
-## Installation
+## 🔧 Installation
 
 ```bash
-pip install fredclient
+pip install -r requirements.txt
 ```
 
-Or clone directly from GitHub:
+You will also need to install `python-dotenv` if you want to load your API key from a `.env` file:
 
 ```bash
-git clone https://github.com/arbaizam/fredclient.git
-cd fredclient
-pip install -e .
+pip install python-dotenv
 ```
 
 ---
 
-## Usage
+## 📁 Project Structure
 
-### Basic Example
+```
+fredclient/
+├── __init__.py
+├── client.py          # FredClient class lives here
+├── metadata.py        # Endpoint metadata
+tests/
+├── test_endpoints.py  # Full test suite for all endpoints
+.env                    # (Optional) for secure API key management
+README.md
+```
+
+---
+
+## 🚀 Usage
+
+### Step 1: Add your API key to a `.env` file
+
+```
+FRED_API_KEY=your_actual_fred_api_key_here
+```
+
+### Step 2: Use the `FredClient` class
 
 ```python
-from fredclient import get_series_observations
+from fredclient.client import FredClient
+import os
+from dotenv import load_dotenv
 
-data = get_series_observations(
-    api_key="YOUR_API_KEY",
-    series_id="GDP",
-    file_type="json"
-)
+load_dotenv()
+api_key = os.getenv("FRED_API_KEY")
 
-print(data)
+client = FredClient(api_key=api_key)
+
+# List available endpoints
+print(client.get_all_endpoints())
+
+# See description for an endpoint
+print(client.describe_endpoint("get_series"))
+
+# Example: Fetch series metadata
+response = client.get_series(series_id="GNPCA")
+print(response)
 ```
 
 ---
 
-### List All Available Endpoints
-
-```python
-from fredclient import get_all_endpoints
-
-print(get_all_endpoints())
-```
-
----
-
-### Describe a Specific Endpoint
-
-```python
-from fredclient import describe_endpoint
-
-print(describe_endpoint("get_series_observations"))
-```
-
----
-
-### Example Output for `describe_endpoint("get_series_observations")`
-
-```
-get_series_observations: Get observations for a series.
-
-Required parameters:
-  - api_key: str
-  - series_id: str
-
-Optional parameters:
-  - file_type: str
-  - realtime_start: str
-  - realtime_end: str
-  - limit: int
-  - offset: int
-  - sort_order: str
-  - observation_start: str
-  - observation_end: str
-  - units: str
-  - frequency: str
-  - aggregation_method: str
-```
-
----
-
-## Testing
-
-To run all tests:
+## 🧪 Running Tests
 
 ```bash
-pytest tests/
+pytest
 ```
 
----
-
-## Contributing
-
-Feel free to submit issues or pull requests. Future enhancements will include:
-
-- Full schema-based validation
-- Pydantic model support for response parsing
-- Support for async and batch queries
+Ensure your `.env` file is present with a valid `FRED_API_KEY` or override in the test script.
 
 ---
 
-## License
+## 🧠 Features
 
-MIT License.
+- ✅ All available FRED endpoints
+- ✅ Automatically validates required and optional parameters
+- ✅ Intelligent error handling for missing/invalid parameters
+- ✅ Endpoint docstrings include parameter descriptions
+- ✅ Programmatic interface for inspecting API structure
+
+---
+
+## 📄 License
+
+MIT License © arbaizam

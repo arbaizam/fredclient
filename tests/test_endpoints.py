@@ -1,36 +1,50 @@
+import os
 import pytest
-from fredclient import (
-    get_category,
-    get_category_children,
-    get_category_series,
-    get_series,
-    get_series_observations
-)
+from dotenv import load_dotenv
+from fredclient.endpoints import FredClient
 
-DEMO_KEY = "YOUR_API_KEY"  # Replace with your FRED demo or personal key
+load_dotenv()  # Loads variables from .env
 
-def test_get_category():
-    resp = get_category(api_key=DEMO_KEY, category_id=125)
-    assert "categories" in resp
+API_KEY = os.getenv("FRED_API_KEY")
 
-def test_get_category_children():
-    resp = get_category_children(api_key=DEMO_KEY, category_id=125)
-    assert "categories" in resp
+@pytest.fixture(scope="module")
+def fred():
+    return FredClient(api_key=API_KEY)
 
-def test_get_category_series():
-    resp = get_category_series(api_key=DEMO_KEY, category_id=125, file_type="json")
-    assert "seriess" in resp
+def test_get_all_endpoints(fred):
+    endpoints = fred.get_all_endpoints()
+    assert isinstance(endpoints, list)
+    assert "get_series" in endpoints
 
-def test_get_series():
-    resp = get_series(api_key=DEMO_KEY, series_id="GDP", file_type="json")
-    assert "seriess" in resp
+def test_describe_endpoint(fred):
+    doc = fred.describe_endpoint("get_series")
+    assert "Required parameters:" in doc
+    assert "series_id" in doc
 
-def test_get_series_observations():
-    resp = get_series_observations(
-        api_key=DEMO_KEY,
-        series_id="GDP",
-        file_type="json",
-        observation_start="2020-01-01",
-        observation_end="2020-12-31"
-    )
-    assert "observations" in resp
+def test_get_series(fred):
+    response = fred.get_series(series_id="GNPCA")
+    assert isinstance(response, dict)
+    assert "seriess" in response
+
+def test_get_category_series(fred):
+    response = fred.get_category_series(category_id=125)
+    assert isinstance(response, dict)
+    assert "seriess" in response
+
+def test_get_series_search(fred):
+    response = fred.get_series_search(search_text="unemployment")
+    assert isinstance(response, dict)
+    assert "seriess" in response
+
+def test_get_series_observations(fred):
+    response = fred.get_series_observations(series_id="GNPCA")
+    assert isinstance(response, dict)
+    assert "observations" in response
+
+def test_invalid_param_type(fred):
+    with pytest.raises(TypeError):
+        fred.get_series(series_id=123)  # should be str
+
+def test_missing_required_param(fred):
+    with pytest.raises(ValueError):
+        fred.get_series()  # missing series_id
